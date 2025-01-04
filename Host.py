@@ -1,24 +1,22 @@
 from flask import Flask, request, jsonify
+import TDS as TDS
 
-# Khởi tạo ứng dụng Flask
 app = Flask(__name__)
 
-# Định nghĩa endpoint POST
-@app.route('/process', methods=['POST'])
-def process_query():
-    # Lấy dữ liệu từ request
-    data = request.json  # Lấy JSON body
-    if not data or 'query' not in data:
-        return jsonify({"error": "Missing 'query' parameter"}), 400
-
-    # Trích xuất query
-    query = data['query']
+@app.route('/postendpoint', methods=['POST'])
+def handle_post():
+    data = request.json
     
-    # Xử lý logic trả về (trong ví dụ này, chỉ đơn giản trả về query đã gửi)
-    response = f"You sent: {query}"
+    tiktok_id = data.get('tiktok_id')
+    tds_token = data.get('tds_token')
     
-    return jsonify({"response": response}), 200
+    if not tiktok_id or not tds_token:
+        return jsonify({
+            'error': 'Missing required fields'
+        }), 400
+    
+    return jsonify({"response": TDS.process_recaptcha(tiktok_id, tds_token)})
 
-# Chạy server
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
